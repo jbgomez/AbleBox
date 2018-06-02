@@ -107,18 +107,6 @@ const getFiles = (userId, folderId, cb) => {
   });
 };
 
-const getKey = (id, cb) => {
-  const query = 'SELECT name, s3_objectId FROM files WHERE id=?';
-
-  db.connection.query(query, id, (err, result, fields) => {
-    if (err) {
-      cb(err, null);
-    } else {
-      cb(null, result);
-    }
-  });
-};
-
 const searchFiles = (userId, keyword, cb) => {
   keyword = '%' + keyword + '%';
 
@@ -171,6 +159,5 @@ exports.deleteFiles = deleteFiles;
 exports.fetchUser = fetchUser;
 exports.getFiles = getFiles;
 exports.searchFiles = searchFiles;
-exports.createFolder = createFolder;
-exports.getKey = getKey;
 exports.searchPath = searchPath;
+
