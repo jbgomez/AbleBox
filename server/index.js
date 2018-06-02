@@ -7,6 +7,10 @@ var bcrypt = require('bcrypt-nodejs');
 var app = express();
 var AWS = require('aws-sdk');
 var config = require('./config.js');
+var fs = require('fs');
+const { Writable } = require('stream');
+var FileSaver = require('file-saver');
+const os = require('os');
 
 var multer = require('multer');
 var multerS3 = require('multer-s3');
@@ -42,18 +46,16 @@ var deleteObject = function(objectKey) {
   });
 };
 
-var getObject = function(objectKey) {
+var getObject = function(objectKey, cb) {
   var params = {
     Bucket: ABLEBOX_BUCKET,
     Key: objectKey
   };
   s3.getObject(params, function(err, data) {
     if (err) {
-      res.status = 400;
-      res.write("ERROR GETTING OBJECT");
-      res.end();
+      cb(err, null)
     } else {
-      return data;
+      cb(null, data);
     }
     //data example:
     /*
@@ -315,6 +317,47 @@ app.post('/createFolder', createFolder, function(req, res) {
       res.write(JSON.stringify({folder_id: result.insertId}));
       res.end();
     }
+  });
+});
+
+app.get('/download', function(req, res, next) {
+  // download the file via aws s3 here
+  db.getKey(req.query.id, function (err, result) {
+    var filename;
+    if (err) {
+      res.status = 404;
+      res.write(err);
+      res.end();
+    } else {
+      var fileKey = result[0].s3_objectId;
+      filename = result[0].name;
+      var options = {
+        Bucket: ABLEBOX_BUCKET,
+        Key: fileKey,
+      };
+
+      s3.headObject(options, (err, data) => {
+        if (err) {
+          // an error occurred
+          console.error(err);
+          return next();
+        }
+        var file = fs.createWriteStream(os.homedir() + '/Downloads/' + filename);
+        var stream = s3.getObject(options).createReadStream();
+
+        res.setHeader('Content-Type', data.ContentType);
+        res.setHeader('Content-Disposition', 'attachment;', 'filename=' + filename);
+        res.setHeader('Content-Length', data.ContentLength);
+
+        stream.on('data', (data) => {
+          file.write(data);
+        }).on('end', function () {
+          file.end();
+          file.close();
+          res.send(file.path);
+        });
+      });
+    };
   });
 });
 
