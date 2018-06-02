@@ -116,6 +116,7 @@ class AllFiles extends React.Component {
           files: JSON.parse(data).result,
           path: JSON.parse(data).path
         })
+        this.props.history.push('/folder/' + folderId);
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         alert('openFolder error: ' + errorThrown);

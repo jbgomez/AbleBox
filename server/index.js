@@ -342,7 +342,7 @@ app.get('/download', function(req, res, next) {
           console.error(err);
           return next();
         }
-        var file = fs.createWriteStream(os.homedir() + '/Downloads/' + filename);
+        var file = fs.createWriteStream(os.homedir() + '\\Downloads\\' + filename);
         var stream = s3.getObject(options).createReadStream();
 
         res.setHeader('Content-Type', data.ContentType);

@@ -11,7 +11,7 @@ const Path = ({path, openFolder}) => (
         : null
       }
       {path.length > 0
-        ? path.slice(-2).map((folder, i) => (
+        ? path.slice(-3).map((folder, i) => (
             folder.name
               ? <span key = {i}> > <img width="30px" src={folderIcon} alt="folder icon"/><span className = "onclick" onClick = {(e) => {openFolder(folder.folder_id)}}>{folder.name}</span></span>
               : <span key = {i}><img width="30px" src={folderIcon} alt="folder icon"/><span className = "onclick" onClick = {(e) => {openFolder(folder.folder_id)}}>home</span></span>
