@@ -1,6 +1,5 @@
 import React from 'react';
 import { Input, Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import css from '../styles/Share.css';
 import shareIcon from '../assets/share.png';
 import $ from 'jquery';
 
@@ -53,8 +52,8 @@ class Share extends React.Component {
   render () {
     return (
       <React.Fragment>
-        <Button className="btn-sm btn-link shadow-sm" onClick={this.toggle} type="download">
-          <img width="30px" background="transparent" src={shareIcon} alt="share"/>
+        <Button className="btn btn-sm btn-outline-secondary shadow-sm" onClick={this.toggle} type="download">
+          <img className="align-text-top" background="transparent" src={shareIcon} alt="share"/>
         </Button>
         <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
           <ModalHeader toggle={this.toggle}>Email</ModalHeader>
