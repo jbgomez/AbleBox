@@ -1,3 +1,4 @@
+var port = process.env.PORT || 3000;
 var express = require('express');
 var bodyParser = require('body-parser');
 var db = require('./models/index.js');
@@ -6,7 +7,8 @@ var session = require('express-session');
 var bcrypt = require('bcrypt-nodejs');
 var app = express();
 var AWS = require('aws-sdk');
-var config = require('./config.js');
+var accessKeyId = process.env.ACCESS_KEY_ID || require('./config.js').keys.accessKeyId;
+var secretAccessKey = process.env.SECRET_ACCESS_KEY || require('./config.js').keys.secretAccessKey;
 var fs = require('fs');
 const { Writable } = require('stream');
 var FileSaver = require('file-saver');
@@ -20,8 +22,8 @@ const S3_API_VER = '2006-03-01';
 var app = express();
 
 var s3 = new AWS.S3({
-  accessKeyId: config.keys.accessKeyId,
-  secretAccessKey: config.keys.secretAccessKey,
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
   Bucket: ABLEBOX_BUCKET,
   apiVersion: S3_API_VER
 });
@@ -138,7 +140,6 @@ var checkUser = (req, res, next) => {
 };
 
 app.get('/home', checkUser, (req, res) => {
-  // delete folderId from sesh if home route (root folder) is hit, as folder_id in db for root is NULL
   req.session.folderId = 0;
   res.sendFile(path.resolve(__dirname + '/../client/dist/index.html'));
 });
@@ -209,7 +210,7 @@ app.get('/logout', (req, res) => {
   }
 });
 
-app.post('/upload', upload.single('file'), function(req, res, next) {
+app.post('/upload', checkUser, upload.single('file'), function(req, res, next) {
   //TODO: validate user email/userid against the sessionid
   db.createFile(req, function(err, result) {
     if (err) {
@@ -224,50 +225,44 @@ app.post('/upload', upload.single('file'), function(req, res, next) {
   });
 });
 
-app.get('/getfiles', checkUser, function(req, res) {
-  let folderId = req.session.folderId;
-  let userId = req.session.user;
-  db.getFiles(userId, folderId, function(err, result) {
-    if (err) {
-      res.status = 404;
-      res.write(err);
-      res.end();
+app.get('/folder/:folderId', (req, res) => {
+  req.session.folderId = req.params.folderId;
+
+  db.verifyFileExistenceAndPermissions(req.params.folderId, req.session.user, function(err, result) {
+    if (err || !result.length) {
+      res.redirect('/login');
     } else {
-      res.status = 200;
-      res.write(JSON.stringify(result));
-      res.end();
+      res.sendFile(path.resolve(__dirname + '/../client/dist/index.html'));
     }
   });
 });
 
-app.get('/folder/:folderid', checkUser, function(req, res) {
-  let folderId = req.params.folderid;
-  let user_id = req.session.user;
-  if(folderId) {
-    db.getFiles(user_id, folderId, function(err, result) {
-      if (err) {
-        res.status = 404;
-        res.write(err);
+app.get('/getfiles', function(req, res) {
+  let folderId = req.session.folderId;
+  let userId = req.session.user;
+  db.getFiles(folderId, userId, function(err, result) {
+    if (err) {
+      res.status = 404;
+      res.write(JSON.stringify(err));
+      res.end();
+    } else {
+      res.status = 200;
+      db.searchPath(userId, folderId, function(err2, path) {
+        let data = {
+          'result': result,
+          'path': path
+        };
+        res.write(JSON.stringify(data));
         res.end();
-      } else {
-        res.status = 200;
-        db.searchPath(user_id, folderId, function(err2, path) {
-          req.session.folderId = folderId;
-          let data = {'result': result,
-                      'path': path };
-          res.write(JSON.stringify(data));
-          res.end();
-        });
-
-      }
-    });
-  }
+      });
+    }
+  });
 });
 
 app.post('/searchfiles', checkUser, function(req, res) {
   let keyword = req.body.keyword;
-  let user_id = req.session.user;
-  db.searchFiles(user_id, keyword, function(err, result) {
+  let userId = req.session.user;
+  db.searchFiles(userId, keyword, function(err, result) {
     if (err) {
       res.status = 404;
       res.write(err);
@@ -282,16 +277,16 @@ app.post('/searchfiles', checkUser, function(req, res) {
 
 app.post('/delete', checkUser, function(req, res) {
   let fileId = req.body.id;
-  let user_id = req.session.user;
+  let userId = req.session.user;
   let folderId = req.session.folderId;
   let is_folder = req.body.is_folder;
-  db.deleteFiles(user_id, fileId, is_folder, function(err, result) {
+  db.deleteFiles(userId, fileId, is_folder, function(err, result) {
     if (err) {
       res.status = 404;
       res.write(err);
       res.end();
     } else {
-      db.getFiles(user_id, folderId, function(err2, result2) {
+      db.getFiles(folderId, userId, function(err2, result2) {
         if (err) {
           res.status = 404;
           res.write(err);
@@ -378,6 +373,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname + '/../client/dist/index.html'));
 });
 
-app.listen(3000, () => {
-  console.log('listening on port 3000');
+app.listen(port, () => {
+  console.log('listening on port ' + port);
 });

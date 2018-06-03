@@ -1,15 +1,15 @@
 import React from 'react';
-import FileListEntry from './FileListEntry.jsx';
-import Files from '../data/mockData.js';
-import Dropzone from './Dropzone.jsx';
-import Path from './Path.jsx';
+import FileListEntry from 'Src/components/FileListEntry.jsx';
+import Dropzone from 'Src/components/Dropzone.jsx';
+import Path from 'Src/components/Path.jsx';
 import { withRouter } from 'react-router-dom';
 import { Row, Col, Input, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import css from '../styles/AllFiles.css';
-import Search from './Search.jsx';
+import css from 'Src/styles/AllFiles.css';
+import Search from 'Src/components/Search.jsx';
 import $ from "jquery";
-import createFolderIcon from '../assets/createFolder.png';
-import _ from 'lodash';
+import createFolderIcon from 'Src/assets/createFolder.png';
+import { debounce } from 'lodash';
+
 
 
 class AllFiles extends React.Component {
@@ -30,9 +30,8 @@ class AllFiles extends React.Component {
     this.createFolder = this.createFolder.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleFiles = this.handleFiles.bind(this);
-    this.searchHandler = _.debounce(this.searchHandler.bind(this), 500);
+    this.searchHandler = debounce(this.searchHandler.bind(this), 500);
     this.handleClickDelete = this.handleClickDelete.bind(this);
-    this.openFolder = this.openFolder.bind(this);
     this.toggle = this.toggle.bind(this);
   }
 
@@ -47,7 +46,8 @@ class AllFiles extends React.Component {
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
         this.setState({
-          files: JSON.parse(data)
+          files: JSON.parse(data).result,
+          path: JSON.parse(data).path
         })
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -69,22 +69,26 @@ class AllFiles extends React.Component {
   }
 
   searchHandler(value) {
-    let data = {'keyword': value};
-    $.ajax({
-      type: 'POST',
-      url: '/searchfiles',
-      data: JSON.stringify(data),
-      contentType: 'application/json; charset=utf-8',
-      success: (data, textStatus, jqXHR) => {
-        this.setState({
-          files: JSON.parse(data),
-          searchMode: true
-        });
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert('search handler error: ' + errorThrown);
-      }
-    });
+    if (!value.length) {
+      this.getFiles();
+    } else {
+      let data = {'keyword': value};
+      $.ajax({
+        type: 'POST',
+        url: '/searchfiles',
+        data: JSON.stringify(data),
+        contentType: 'application/json; charset=utf-8',
+        success: (data, textStatus, jqXHR) => {
+          this.setState({
+            files: JSON.parse(data),
+            searchMode: true
+          });
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          alert('search handler error: ' + errorThrown);
+        }
+      });
+    }
   }
 
   createFolder() {
@@ -102,24 +106,6 @@ class AllFiles extends React.Component {
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         this.toggleError();
-      },
-    });
-  }
-
-  openFolder(folderId) {
-    $.ajax({
-      type: 'GET',
-      url: '/folder/' + folderId,
-      contentType: 'application/json; charset=utf-8',
-      success: (data, textStatus, jqXHR) => {
-        this.setState({
-          files: JSON.parse(data).result,
-          path: JSON.parse(data).path
-        })
-        this.props.history.push('/folder/' + folderId);
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert('openFolder error: ' + errorThrown);
       },
     });
   }
@@ -173,13 +159,13 @@ class AllFiles extends React.Component {
 
     return (
       <React.Fragment>
-        <Row className="mt-3">
-          <Col xs="10" sm="10" md="10" lg="10">
+        <Row className="mt-3 no-gutters">
+          <Col xs="10" sm="10" md="9" lg="8" className="mr-auto">
            <Search searchHandler={this.searchHandler} handleKeyPress ={this.handleKeyPress} />
           </Col>
-          <Col xs="2" sm="2" md="2" lg="2">
+          <Col xs="auto">
             <Button className="btn-sm btn-link shadow-sm" onClick={this.toggle} type="download">
-              <img width="30px" background="transparent" src={createFolderIcon} alt="createFolder"/>
+              <img background="transparent" src={createFolderIcon} alt="createFolder"/>
             </Button>
             <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
               <ModalHeader toggle={this.toggle}>Folder Name</ModalHeader>
@@ -193,10 +179,10 @@ class AllFiles extends React.Component {
             </Modal>
           </Col>
         </Row>
-        <Path path = {this.state.path} openFolder = {this.openFolder}/>
+        <Path path = {this.state.path}/>
         <Dropzone files={this.state.files} handleFiles={this.handleFiles} searchMode={this.state.searchMode}>
           {this.state.files.length
-            ? this.state.files.map((file, i) => <FileListEntry key={i} file={file} openFolder={this.openFolder} handleClickDelete={this.handleClickDelete}/>)
+            ? this.state.files.map((file, i) => <FileListEntry key={i} file={file} handleClickDelete={this.handleClickDelete}/>)
             : null
           }
         </Dropzone>

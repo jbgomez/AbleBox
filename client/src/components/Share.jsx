@@ -1,7 +1,6 @@
 import React from 'react';
 import Helmet from 'react-helmet';
-import { Row, Col, Progress } from 'reactstrap';
-import css from '../styles/Share.css';
+import { Col, Button } from 'reactstrap';
 import $ from 'jquery';
 
 class Share extends React.Component {
@@ -33,15 +32,13 @@ class Share extends React.Component {
 
   render () {
     return (
-      <div className="share">
+      <React.Fragment>
         <Helmet>
           <meta property="og:url" content={'"https://s3-us-west-1.amazonaws.com/ablebox/' + this.props.file.s3_objectId + '"'}/>
           <meta property="og:title" content={'"' + this.props.file.name + '"'} />
         </Helmet>
-        <Col sm="auto">
-          <div id="shareBtn" className="btn btn-success clearfix" onClick={this.handleClick}>Share</div>
-        </Col>
-      </div>
+        <Button className="btn btn-sm btn-outline-success" onClick={this.handleClick}>Share</Button>
+      </React.Fragment>
     );
   }
 }

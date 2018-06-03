@@ -28,9 +28,10 @@ class Header extends React.Component {
   }
 
   render() {
+    const pathName = this.props.location.pathname;
     return (
       <header>
-        {(this.props.location.pathname === '/home') ? //this is temporarily set to false. Will need to be modified to check for signed in state
+        {(pathName === '/home' || pathName.slice(0, 7) === '/folder') ? //this is temporarily set to false. Will need to be modified to check for signed in state
           (<Navbar className="navbar bg-transparent" light>
             <NavbarBrand href="/home">
               <img src={logo} alt="Logo"/>

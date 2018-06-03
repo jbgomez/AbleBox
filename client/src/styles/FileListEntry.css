@@ -5,18 +5,12 @@
 .file-list-entry:last-child {
   border-bottom: 1px solid lightgray;
 }
-
 .onclick:hover {
   cursor: pointer;
   text-decoration: underline;
   color: #808080;
 }
-
-.deleteBtn {
-  font-family: 'Roboto', sans-serif;
-  border-top: 1px solid lightgray;
-}
-
-.deleteBtn:last-child {
-  border-bottom: 1px solid lightgray;
+.timestamp {
+  font-size: 0.9em;
+  color: gray;
 }

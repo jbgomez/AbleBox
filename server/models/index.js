@@ -46,7 +46,7 @@ const fetchUser = (email, cb) => {
 const createFile = (req, cb) => {
   const fileDetails = {
     name: req.file.originalname,
-    folder_id: req.session.folderId ? req.session.folderId : 0,
+    folder_id: req.session.folderId,
     file_ext: req.file.contentType,
     user_id: req.session.user,
     s3_objectId: req.file.key
@@ -95,10 +95,22 @@ const deleteFiles = (userId, fileId, is_folder, cb) => {
   });
 };
 
+const getFiles = (folderId, userId, cb) => {
+  const query = 'SELECT id, name, s3_objectId, is_public, created_on as lastModified, is_folder FROM files WHERE folder_id = ? AND user_id = ? ORDER BY is_folder DESC, name';
 
-const getFiles = (userId, folderId, cb) => {
-  const query = 'SELECT id, name, s3_objectId, is_public, created_on as lastModified, is_folder FROM files WHERE user_id = ? AND folder_id = ? ORDER BY is_folder DESC, name';
-  db.connection.query(query, [userId, folderId], (err, result, fields) => {
+  db.connection.query(query, [folderId, userId], (err, result, fields) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      cb(null, result);
+    }
+  });
+};
+
+const verifyFileExistenceAndPermissions = (folderId, userId, cb) => {
+  const query = 'SELECT id FROM files WHERE id = ? AND id <> 0 AND (user_id = ? OR is_public = 1)';
+  
+  db.connection.query(query, [folderId, userId], (err, result, fields) => {
     if (err) {
       cb(err, null);
     } else {
@@ -161,7 +173,6 @@ const changeFilePermissions = (id, permission, cb) => {
   });
 };
 
-
 exports.changeFilePermissions = changeFilePermissions;
 exports.checkUserExists = checkUserExists;
 exports.createFile = createFile;
@@ -174,3 +185,4 @@ exports.searchFiles = searchFiles;
 exports.createFolder = createFolder;
 exports.getKey = getKey;
 exports.searchPath = searchPath;
+exports.verifyFileExistenceAndPermissions = verifyFileExistenceAndPermissions;

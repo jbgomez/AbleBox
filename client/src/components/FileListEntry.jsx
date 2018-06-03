@@ -6,6 +6,7 @@ import Share from './Share.jsx';
 import fileIcon from '../assets/file.png';
 import folderIcon from '../assets/Folder.png';
 import downloadIcon from '../assets/download.png'
+import css from '../styles/FileListEntry.css';
 
 
 class FileListEntry extends React.Component {
@@ -75,39 +76,42 @@ class FileListEntry extends React.Component {
 	render() {
 		return (
 		  <Col xs="auto" className="file-list-entry py-3">
-		  	<Row className="justify-content-between">
-		  		<Col xs="3" sm="5" md="5" lg="7">
+		  	<Row className="text-sm-center justify-content-center">
+		  		<Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
 		  			{this.props.file.is_folder
 			  			? <img width="30px" src={folderIcon} alt="folder icon"/>
 			  			: <img width="30px" src={fileIcon} alt="file icon"/>
 		  			}
 	   				{this.props.file.is_folder
-              ? <span className="onclick" onClick={()=>{this.props.openFolder(this.props.file.id)}}> {this.props.file.name}</span>
-              : <span> {this.props.file.name}</span>
+              ? <span className="align-middle ml-2"><a href={'/folder/' + this.props.file.id}>{this.props.file.name}</a></span>
+              : <span className="align-middle ml-2">{this.props.file.name}</span>
             }
 	   			</Col>
-		  		<Col xs="2" sm="3" md="3" lg="2">
-	   				<span style={{fontSize: '0.9em', color: 'gray'}}>{moment(this.props.file.lastModified).format('MM/DD/YY h:mm a')}</span>
+		  		<Col xs="12" sm="4" md="auto" className="mr-md-4 text-center text-sm-right text-md-left">
+	   				<span className="timestamp align-middle">{moment(this.props.file.lastModified).format('MM/DD/YY h:mm a')}</span>
 	   			</Col>
-          <Col xs="1" sm="1" md="1" lg="1">
-            {(!this.props.file.is_folder) ? <Button className="btn-sm btn-link shadow-sm" onClick={this.handleDownload} type="download">
-              <img width="30px" background="transparent" src={downloadIcon} alt="Download"/>
-            </Button>: null}
+          <Col xs="auto" className={'mt-3 mt-sm-4 mt-md-0 ' + (this.props.file.is_folder ? 'd-none d-md-block' : '')}>
+            <Button className={'btn-sm btn-link shadow-sm ' + (this.props.file.is_folder ? 'invisible' : '')} onClick={this.handleDownload} type="download">
+              <img background="transparent" src={downloadIcon} alt="Download"/>
+            </Button>
           </Col>
-	   			<Col xs="1" sm="1" md="1" lg="1">
-          	<div id="deleteBtn" className="btn btn-success clearfix" onClick={(e)=>{this.props.handleClickDelete(this.props.file.id, this.props.file.is_folder)}}>Delete</div>
+	   			<Col xs="auto" className="mt-3 mt-sm-4 mt-md-0">
+          	<Button className="btn btn-sm btn-outline-danger" onClick={(e)=>{this.props.handleClickDelete(this.props.file.id, this.props.file.is_folder)}}>Delete</Button>
         	</Col>
-	   			<Col xs="1" sm="1" md="1" lg="1">
-	   				<span><Share file={this.props.file} share={this.share}/></span>
+	   			<Col xs="auto" className="mt-3 mt-sm-4 mt-md-0">
+	   				<Share file={this.props.file} share={this.share}/>
 	   			</Col>
 	   		</Row>
-        <Row>
-          {(this.state.message) ? <Alert color="dark">
-              {this.state.message}
-          </Alert> : null}
-        </Row>
+        {this.state.message
+          ? (
+              <Row>
+                <Alert color="dark">{this.state.message}</Alert>
+              </Row>
+            )
+          : null
+        }
 				{this.state.upload
-					? <Progress value={this.state.uploadProgress} />
+					? <Progress value={this.state.uploadProgress} className="mt-3" />
 					: null
 				}
 			</Col>
