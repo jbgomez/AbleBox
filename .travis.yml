@@ -9,4 +9,6 @@ deploy:
   region: us-west-1
   app: AbleBox
   env: Ablebox-env
+  on:
+    branch: joseph
   bucket_name: elasticbeanstalk-us-west-1-027484451920
