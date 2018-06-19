@@ -9,8 +9,6 @@ const connection = mysql.createConnection({
   multipleStatements: true
 });
 
-connection.connect();
-
 connection.query(`
   CREATE DATABASE IF NOT EXISTS ablebox;
 
