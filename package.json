@@ -8,7 +8,8 @@
     "server-dev": "nodemon server/index.js",
     "react-prod": "webpack -p",
     "server-prod": "node server/index.js",
-    "start": "npm rebuild && npm install && npm run server-prod"
+    "prestart": "npm install --unsafe-perm=true",
+    "start": "npm rebuild && npm run server-prod"
   },
   "repository": {
     "type": "git",
