@@ -2,6 +2,7 @@ const mysql = require('mysql');
 
 const connection = mysql.createConnection({
   host: process.env.MYSQL_HOST || 'localhost',
+  port: 3306,
   user: process.env.MYSQL_USER || "root",
   password: process.env.MYSQL_PASSWORD || "",
   database: "ablebox",
