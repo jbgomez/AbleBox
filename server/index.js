@@ -7,8 +7,9 @@ var session = require('express-session');
 var bcrypt = require('bcrypt-nodejs');
 var app = express();
 var AWS = require('aws-sdk');
-var accessKeyId = process.env.ACCESS_KEY_ID || require('./config.js').keys.accessKeyId;
-var secretAccessKey = process.env.SECRET_ACCESS_KEY || require('./config.js').keys.secretAccessKey;
+var s3BucketInfo = require('./config.js');
+var accessKeyId = process.env.ACCESS_KEY_ID || s3BucketInfo.accessKeyId;
+var secretAccessKey = process.env.SECRET_ACCESS_KEY || s3BucketInfo.secretAccessKey;
 var fs = require('fs');
 const { Writable } = require('stream');
 var FileSaver = require('file-saver');
@@ -16,7 +17,7 @@ const os = require('os');
 
 var multer = require('multer');
 var multerS3 = require('multer-s3');
-const ABLEBOX_BUCKET = 'ablebox';
+const ABLEBOX_BUCKET = process.env.S3_BUCKET_NAME || s3BucketInfo.bucketName;
 const S3_API_VER = '2006-03-01';
 
 var app = express();

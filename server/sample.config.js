@@ -1,7 +1,7 @@
-const keys = {
-  accessKeyId: process.env.ACCESS_KEY_ID || ACCESS_KEY_ID;,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY || SECRET_ACCESS_KEY,
-  region: process.env.REGION || REGION
+const s3BucketInfo = {
+  bucketName: process.env.BUCKET_NAME || 'BUCKET_NAME',
+  accessKeyId: process.env.ACCESS_KEY_ID || 'ACCESS_KEY_ID',
+  secretAccessKey: process.env.SECRET_ACCESS_KEY || 'SECRET_ACCESS_KEY'
 };
 
-exports.keys = keys;
+module.exports = s3BucketInfo;

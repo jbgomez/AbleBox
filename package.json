@@ -2,10 +2,13 @@
   "name": "ablebox",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
     "react-dev": "webpack -d --watch",
-    "server-dev": "nodemon server/index.js"
+    "server-dev": "nodemon server/index.js",
+    "react-prod": "webpack -p",
+    "server-prod": "node server/index.js",
+    "start": "npm run server-prod"
   },
   "repository": {
     "type": "git",
