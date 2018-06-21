@@ -123,7 +123,8 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use(express.static(__dirname + '/../client/dist'));
+app.use(express.static(path.resolve(__dirname, '../client/dist')));
+
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
@@ -379,7 +380,7 @@ app.post('/share', (req, res) => {
   });
 });
 
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(path.resolve(__dirname + '/../client/dist/index.html'));
 });
 
